@@ -1,0 +1,72 @@
+﻿<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Upload with Barcode Separater</title>
+</head>
+<body>
+    <input type="button" onclick="BrowseAFile();" value="Browse" />
+    <input type="button" onclick="SaveFile();" value="Save" />
+    <div id="dwtcontrolContainer"></div>
+
+    <script type="text/javascript" src="Resources/dynamsoft.imagecapturesuite.initiate.js"></script>
+    <script type="text/javascript">
+        function BrowseAFile() {
+            DWObject.IfShowFileDialog = true;
+            DWObject.LoadImageEx("", 5);
+        }
+        function SaveFile() {
+            var _strServerName = location.hostname; //Demo: "www.dynamsoft.com";
+            var _strPort = location.port == "" ? 80 : location.port; //Demo: 80;
+            var _currentPathName = unescape(location.pathname); // get current PathName in plain ASCII
+            var _currentPath = _currentPathName.substring(0, _currentPathName.lastIndexOf("/") + 1);
+            DWObject.HTTPPort = _strPort;
+
+            var bSave = false;
+            var imgCtr = 0;
+            indexArrays = [];
+
+            DWObject.IfShowProgressBar = false;
+            var barcodepage = 0;
+            for (var i = 0; i < DWObject.HowManyImagesInBuffer; i++) {
+                DWObject.CurrentImageIndexInBuffer = i;
+                DWObject.ReadBarcode(DWObject.CurrentImageIndexInBuffer, 0);
+                var bartext = "", docNumber = "", strFileName = "";
+                if (DWObject.BarcodeCount != 0) {
+                    var indexArray = {
+                        indexes: [],
+                        text: ""
+                    }
+                    for (j = 0; j < DWObject.BarcodeCount; j++)
+                        bartext = DWObject.GetBarcodeText(j);
+                    for (var k = imgCtr; k < i; k++) {
+                        indexArray.indexes.push(k);
+                    }
+                    indexArray.text = bartext;
+                    if (indexArray.indexes.length != 0) {
+                        indexArrays.push(indexArray);
+                    }
+                    imgCtr = i + 1;
+                }
+            }
+            for (var n = 0; n < indexArrays.length; n++) {
+                var currentTime = new Date();
+                var hours = currentTime.getHours();
+                var minutes = currentTime.getMinutes();
+                var seconds = currentTime.getSeconds();
+                strFileName = "ICSUpload_" + hours + "-" + minutes + "-" + seconds + ".pdf";
+                DWObject.SelectedImagesCount = indexArrays[n].indexes.length;
+                for (var m = 0; m < indexArrays[n].indexes.length; m++) {
+                    DWObject.SetSelectedImageIndex(m, indexArrays[n].indexes[m]);
+                }
+                bSave = DWObject.HTTPUploadThroughPostAsMultiPagePDF(_strServerName, _currentPath + "Actions/SaveUploadedFile.aspx", strFileName);
+            }
+        }
+        function Dynamsoft_OnPostLoad() { }
+        function Dynamsoft_OnGetFilePath() { }
+    </script>
+    <script type="text/javascript" src="Resources/dynamsoft.imagecapturesuite.config.js"></script>
+    <script type="text/javascript">
+        DWObject.style.width = "600px";
+        DWObject.style.height = "600px";
+    </script>
+</body>
+</html>

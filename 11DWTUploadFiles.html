@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Upload Only</title>
+</head>
+<body>
+    <input type="button" value="Upload" onclick="UploadFiles();" />
+    <div id="dwtcontrolContainer">
+    </div>
+
+    <div id="response"></div>
+    <script type="text/javascript" src="Resources/dynamsoft.webtwain.initiate.js"></script>
+    <!--Custom script goes here-->
+    <script type="text/javascript">
+        function UploadFiles() {
+            if (!DWObject.ShowFileDialog(false, "All files|*.*", 0, "", "", true, true, 0)) {
+                document.getElementById("response").innerHTML = "Aborted";
+            }
+        }
+        function Dynamsoft_OnGetFilePath(bSave, count, index, path, name) {
+            fileName = path + "\\" + name;
+            UploadFile(fileName, name);
+        }
+        function UploadFile(localFilePath, fileName) {
+            var _strServerName = location.hostname; //Demo: "www.dynamsoft.com";
+            var _strPort = location.port == "" ? 80 : location.port; //Demo: 80;
+            var _currentPathName = unescape(location.pathname); // get current PathName in plain ASCII
+            var _currentPath = _currentPathName.substring(0, _currentPathName.lastIndexOf("/") + 1);
+            var _strActionPage = _currentPath + "Actions/SaveUploadedFile.aspx";
+            DWObject.HTTPPort = _strPort;
+            DWObject.HTTPUploadThroughPostDirectly(
+            _strServerName,
+            localFilePath,
+            _strActionPage,
+            fileName);
+            checkErrorString(fileName);
+        }
+        function checkErrorString(name) {
+            if (DWObject.ErrorCode == 0) {
+                document.getElementById("response").innerHTML = name + " <br />was uploaded successfully";
+                return true;
+            }
+            if (DWObject.ErrorCode == -2115) //Cancel file dialog
+                return true;
+            else {
+                if (DWObject.ErrorCode == -2003) {
+                    document.getElementById("response").innerHTML = DWObject.HTTPPostResponseString;
+                }
+                return false;
+            }
+        }
+    </script>
+    <script type="text/javascript" src="Resources/dynamsoft.webtwain.config.js"></script>
+    <script>
+        dwtcontrolContainer.style.width = "1px";
+        dwtcontrolContainer.style.height = "1px";
+        DWObject.style.width = "1px";
+        DWObject.style.height = "1px";
+    </script>
+</body>
+</html>

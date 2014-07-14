@@ -1,0 +1,131 @@
+﻿<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Upload with Barcode Separater</title>
+</head>
+<body>
+    <input type="button" onclick="BrowseAFile();" value="Browse" />
+    <input type="button" onclick="SaveFile();" value="Save" />
+    <div id="dwtcontrolContainer"></div>
+
+    <script type="text/javascript" src="Resources/dynamsoft.imagecapturesuite.initiate.js"></script>
+    <script type="text/javascript">
+        function BrowseAFile() {
+            DWObject.IfShowFileDialog = true;
+            DWObject.LoadImageEx("", 5);
+        }
+        function SaveFile() {
+            var _strServerName = location.hostname; //Demo: "www.dynamsoft.com";
+            var _strPort = location.port == "" ? 80 : location.port; //Demo: 80;
+            var _currentPathName = unescape(location.pathname); // get current PathName in plain ASCII
+            var _currentPath = _currentPathName.substring(0, _currentPathName.lastIndexOf("/") + 1);
+            DWObject.HTTPPort = _strPort;
+
+            var bSave = false;
+            var imgCtr = [];
+            indexArrays = [];
+            imageArrays = [];
+            var bartext = "", prevtext = "";
+
+            DWObject.IfShowProgressBar = false;
+
+            for (var i = 0; i < DWObject.HowManyImagesInBuffer; i++) {
+                DWObject.CurrentImageIndexInBuffer = i;
+                DWObject.ReadBarcode(DWObject.CurrentImageIndexInBuffer, 0);
+
+                if (DWObject.BarcodeCount != 0) {
+                    for (j = 0; j < DWObject.BarcodeCount; j++)
+                        bartext = DWObject.GetBarcodeText(j);
+
+                    var imageArray = {
+                        indexes: i,
+                        text: bartext
+                    }
+                    imageArrays.push(imageArray);
+                }
+
+            }
+
+            var allbarcode = [];
+
+            for (var i = 0; i < imageArrays.length; i++) {
+                allbarcode.push(imageArrays[i].text);
+            }
+
+            var unqbarcode = arrayUnique(allbarcode);
+
+            for (var i = 0; i < unqbarcode.length; i++) {
+
+                var indexArray = {
+                    indexes: [],
+                    text: ""
+                }
+
+                for (var j = 0; j < imageArrays.length; j++) {
+                    if (imageArrays[j].text == unqbarcode[i])
+                        indexArray.indexes.push(j);
+                }
+                indexArray.text = unqbarcode[i];
+
+                if (indexArray.indexes.length != 0) {
+                    indexArrays.push(indexArray);
+                }
+
+
+            }
+
+            for (var n = 0; n < indexArrays.length; n++) {
+
+                bSave = false;
+                var docNumber = indexArrays[n].text;
+
+                strFileName = getDocType(docNumber).replace('/', '%') + ".pdf";
+                DWObject.SelectedImagesCount = indexArrays[n].indexes.length;
+                for (var m = 0; m < indexArrays[n].indexes.length; m++) {
+                    DWObject.SetSelectedImageIndex(m, indexArrays[n].indexes[m]);
+                }
+                bSave = DWObject.HTTPUploadThroughPostAsMultiPagePDF(_strServerName, _currentPath + "Actions/SaveUploadedFile.aspx", strFileName);
+            }
+        }
+        function arrayUnique(a) {
+            return a.reduce(function (p, c) {
+                if (p.indexOf(c) < 0) p.push(c);
+                return p;
+            }, []);
+        };
+
+        function getDocType(docNumber) {
+
+            var bartext = "";
+
+            switch (docNumber) {
+                case "100":
+                    bartext = "Document_A";
+                    break;
+                case "101":
+                    bartext = "Document_B";
+                    break;
+                case "102":
+                    bartext = "Document_C";
+                    break;
+                case "103":
+                    bartext = "Document_D";
+                    break;
+                default:
+                    bartext = "Undefined";
+
+
+            }
+
+            return bartext;
+        }
+
+        function Dynamsoft_OnPostLoad() { }
+        function Dynamsoft_OnGetFilePath() { }
+    </script>
+    <script type="text/javascript" src="Resources/dynamsoft.imagecapturesuite.config.js"></script>
+    <script type="text/javascript">
+        DWObject.style.width = "600px";
+        DWObject.style.height = "600px";
+    </script>
+</body>
+</html>

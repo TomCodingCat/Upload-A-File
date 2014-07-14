@@ -1,0 +1,58 @@
+﻿<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Upload A File</title>
+</head>
+<body>
+    <input type="button" onclick="BrowseAFile();" value="Browse" />
+    <div id="dwtcontrolContainer"></div>
+
+    <script type="text/javascript" src="Resources/dynamsoft.imagecapturesuite.initiate.js"></script>
+    <script type="text/javascript">
+        strOCR = "";
+        function BrowseAFile() {
+            DWObject.IfShowFileDialog = true;
+            DWObject.LoadImageEx("", 5);
+        }
+        function Dynamsoft_OnPostLoad() {
+            setTimeout(J_OCRing, 3 ]00);
+        }
+        function J_OCRing() {
+            DWObject.OCRLanguage = "eng";
+            /**********************
+            //Download language data if it doesn't exist*/
+            DWObject.HTTPPort = 80;
+            DWObject.HTTPDownloadOCRLangData("www.dynamsoft.com", "/download/OCR Language/" + "eng" + ".zip", true);
+            /**********************/
+            var count = DWObject.HowManyImagesInBuffer;
+            DWObject.SelectedImagesCount = count;
+            for (var i = 0; i < count; i++) {
+                DWObject.SetSelectedImageIndex(i, i);
+            }
+            DWObject.IfShowProgressBar = true;
+            DWObject.OCRResultFormat = 0;//result is a string
+            strStringVariable = DWObject.OCRSelectedImagesEx();
+            DWObject.ClearAllHTTPFormField();
+            DWObject.SetHTTPFormField("ExtractedTxt", strStringVariable);
+            DWObject.OCRResultFormat = 2;//result is a PDF/A (image over text)
+            strImageData = DWObject.OCRSelectedImagesEx();
+            DWObject.SetHTTPFormField("PDFAImageData", strImageData);
+
+            //Upload all Data
+            var _strServerName = location.hostname;
+            var _strPort = location.port == "" ? 80 : location.port;
+            var _currentPathName = unescape(location.pathname);
+            var _currentPath = _currentPathName.substring(0, _currentPathName.lastIndexOf("/") + 1);
+            var _actionPage = _currentPath + "Actions/ReceiveOCRResult.aspx";
+            DWObject.HTTPPort = _strPort;
+            DWObject.HTTPUploadAllThroughPostAsPDF(_strServerName, _actionPage, "ImageOnlyPDF.pdf");
+        }
+        function Dynamsoft_OnGetFilePath() { }
+    </script>
+
+    <script type="text/javascript" src="Resources/dynamsoft.imagecapturesuite.config.js"></script>
+    <script type="text/javascript">
+        DWObject.style.width = "300px";
+        DWObject.style.height = "300px";
+    </script>
+</body>
+</html>

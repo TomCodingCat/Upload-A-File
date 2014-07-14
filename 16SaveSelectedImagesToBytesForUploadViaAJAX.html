@@ -1,0 +1,52 @@
+﻿<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Upload with Barcode Separater</title>
+</head>
+<body>
+    <input type="button" onclick="BrowseAFile();" value="Browse" />
+    <input type="button" onclick="SaveFile();" value="Save" />
+    <form id="uploadimg" action="AJAXUploadBytes.aspx" enctype="multipart/form-data"></form>
+    <div id="dwtcontrolContainer"></div>
+    <script type="text/javascript" src="Scripts/Ajax.js"></script>
+    <script type="text/javascript" src="Resources/dynamsoft.imagecapturesuite.initiate.js"></script>
+    <script type="text/javascript">
+        function BrowseAFile() {
+            DWObject.IfShowFileDialog = true;
+            DWObject.LoadImageEx("", 5);
+        }
+        function SaveFile() {
+            var _strServerName = location.hostname; //Demo: "www.dynamsoft.com";
+            var _strPort = location.port == "" ? 80 : location.port; //Demo: 80;
+            var _currentPathName = unescape(location.pathname); // get current PathName in plain ASCII
+            var _currentPath = _currentPathName.substring(0, _currentPathName.lastIndexOf("/") + 1);
+            var _strActionPage = _currentPath + "Actions/AJAXUploadBytes.aspx";
+            var _uploadHeaders = [];
+            var _uploadHeader = {
+                key: "Content-Type",
+                value: "application/x-www-form-urlencoded"
+            }
+            _uploadHeaders.push(_uploadHeader);
+            DWObject.HTTPPort = _strPort;
+            DWObject.SelectedImagesCount = DWObject.HowManyImagesInBuffer;
+            for (var i = 0; i < DWObject.HowManyImagesInBuffer; i++) {
+                DWObject.SetSelectedImageIndex(i, i);
+            }
+            var size = DWObject.GetSelectedImagesSize(4);
+            ary = new Array(size);
+            DWObject.SaveSelectedImagesToBytes(size, ary)
+
+            var uploadData = encodeURIComponent("ImageName") + "=" + encodeURIComponent("testAJAXUploadBytes.pdf")
+                + "&" + encodeURIComponent("RemoteFile") + "=" + encodeURIComponent(ary);
+            var ajax_request = createXMLHttpRequest();
+            requestData(ajax_request, _strActionPage, uploadData, null, "POST", _uploadHeaders)
+        }
+        function Dynamsoft_OnPostLoad() { }
+        function Dynamsoft_OnGetFilePath() { }
+    </script>
+    <script type="text/javascript" src="Resources/dynamsoft.imagecapturesuite.config.js"></script>
+    <script type="text/javascript">
+        DWObject.style.width = "600px";
+        DWObject.style.height = "600px";
+    </script>
+</body>
+</html>

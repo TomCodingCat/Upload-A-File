@@ -1,0 +1,45 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="Site.master.cs" Inherits="Site" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1" runat="server">
+    <title>Forms Authentication, Authorization, and User Accounts</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+    <div id="wrapper">
+        <form id="form1" runat="server">
+
+            <div id="header">
+               
+            </div>
+
+            <div id="content">
+                <asp:ContentPlaceHolder ID="MainContent" runat="server">
+                    <!-- Page-specific content will go here... -->
+                </asp:ContentPlaceHolder>
+            </div>
+
+            <div id="navigation">
+                <asp:ContentPlaceHolder ID="LoginContent" runat="server">
+                    <asp:LoginView ID="LoginView1" runat="server">
+                        <AnonymousTemplate>
+                            Hello Stranger. 
+                        </AnonymousTemplate>
+                        <LoggedInTemplate>
+                            Welcome back,
+                            <asp:LoginName ID="LoginName1" runat="server" />
+                        </LoggedInTemplate>
+                    </asp:LoginView>
+                    <br />
+                    <asp:LoginStatus ID="LoginStatus1" runat="server" LogoutAction="Redirect" LogoutPageUrl="~/SupportingFiles/Logout.aspx" />
+        
+                    <br />
+                    <br />
+                    <!-- Page-specific content will go here... -->
+                </asp:ContentPlaceHolder>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

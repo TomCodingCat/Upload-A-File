@@ -1,0 +1,29 @@
+﻿<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Upload A File</title>
+</head>
+<body>
+
+    <div id="dwtcontrolContainer"></div>
+    <div id="returninfo"></div>
+    <input type="button" onclick="BrowseAFile();" value="Browse" />
+    <script type="text/javascript" src="Resources/dynamsoft.imagecapturesuite.initiate.js"></script>
+    <script type="text/javascript">
+        function BrowseAFile() {
+            DWObject.IfShowFileDialog = true;
+            DWObject.LoadImageEx("", 5);
+        }
+        function Dynamsoft_OnPostLoad() {
+            var _strServerName = location.hostname; //Demo: "www.dynamsoft.com";
+            var _strPort = location.port == "" ? 80 : location.port; //Demo: 80;
+            var _currentPathName = unescape(location.pathname); // get current PathName in plain ASCII
+            var _currentPath = _currentPathName.substring(0, _currentPathName.lastIndexOf("/") + 1);
+            DWObject.HTTPPort = _strPort;
+            DWObject.HTTPUploadAllThroughPostAsPDF(_strServerName, _currentPath + "Actions/SaveUploadedFile.aspx", "test.pdf");
+            document.getElementById("returninfo").innerHTML = DWObject.HTTPPostResponseString;
+        }
+        function Dynamsoft_OnGetFilePath() { }
+    </script>
+    <script type="text/javascript" src="Resources/dynamsoft.imagecapturesuite.config.js"></script>
+</body>
+</html>
